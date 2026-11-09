@@ -1,266 +1,620 @@
 # PayFlow AI — Enterprise Invoice Intelligence & Payment Automation Platform
 
 > **PayPal AI Hackathon 2026 Submission**  
-> *Inspired by enterprise document intelligence references (PaddleOCR-VL 1.6) and PayPal B2B payment automation.*
+> *From Invoice to Intelligence to Payment.*
+
+PayFlow AI is an enterprise-oriented invoice intelligence and payment automation platform designed to streamline invoice processing, financial risk assessment, Indian GST compliance, payment planning, and verified PayPal settlements.
+
+The platform combines multimodal document extraction, deterministic financial validation, AI-powered risk analysis, intelligent payment recommendations, and human-authorized payment execution through an integrated web dashboard.
 
 ---
 
-## 🌟 Architecture Overview
+## 1. System Architecture
 
+```text
+                  ┌──────────────────────────────────────────────┐
+                  │        PayFlow AI Enterprise Suite           │
+                  └──────────────────────┬───────────────────────┘
+                                         │
+                  ┌──────────────────────▼───────────────────────┐
+                  │             React / Vite Frontend             │
+                  │  Dashboard | Invoices | Planner | Reports     │
+                  │  Analytics | Assistant | Checkout | Admin     │
+                  └──────────────────────┬───────────────────────┘
+                                         │
+                                  REST API Requests
+                                         │
+                  ┌──────────────────────▼───────────────────────┐
+                  │                FastAPI Backend                │
+                  └──────────────────────┬───────────────────────┘
+                                         │
+          ┌──────────────────────────────┼──────────────────────────────┐
+          │                              │                              │
+┌─────────▼──────────┐       ┌───────────▼──────────┐       ┌──────────▼─────────┐
+│ Document Intelligence│     │ Financial Intelligence│     │ Payment Automation │
+├─────────────────────┤     ├──────────────────────┤     ├─────────────────────┤
+│ PDF / Image Upload  │     │ Risk Assessment      │     │ Payment Planner     │
+│ PaddleOCR-VL        │     │ Duplicate Detection  │     │ PayPal REST API     │
+│ PyMuPDF             │     │ GST Validation       │     │ Order Creation      │
+│ Image Preprocessing │     │ HSN / SAC Validation │     │ Verified Capture    │
+│ OCR Extraction      │     │ AI Risk Explanations │     │ Transaction Ledger  │
+└─────────────────────┘     └──────────────────────┘     └─────────────────────┘
+          │                              │                              │
+          └──────────────────────────────┼──────────────────────────────┘
+                                         │
+                  ┌──────────────────────▼───────────────────────┐
+                  │             Supporting Services              │
+                  ├──────────────────────────────────────────────┤
+                  │ PayFlow AI Copilot | GST Intelligence        │
+                  │ Audit Reports | Notifications | RBAC         │
+                  │ Invoice History | Financial Analytics        │
+                  └──────────────────────┬───────────────────────┘
+                                         │
+                  ┌──────────────────────▼───────────────────────┐
+                  │                 Data Storage                  │
+                  │                 SQLite Database               │
+                  └──────────────────────────────────────────────┘
 ```
-                                      ┌──────────────────────────────────────────────────────────────┐
-                                      │              PayFlow AI Enterprise Suite                     │
-                                      └──────────────────────────────┬───────────────────────────────┘
-                                                                     │
-                 ┌───────────────────────────────────────────────────┼───────────────────────────────────────────────────┐
-                 │                                                   │                                                   │
-  ┌──────────────▼─────────────┐                      ┌──────────────▼─────────────┐                      ┌──────────────▼─────────────┐
-  │  Document Ingestion & OCR  │                      │   Risk & GST Intelligence  │                      │   Payment & Settlement     │
-  ├────────────────────────────┤                      ├────────────────────────────┤                      ├────────────────────────────┤
-  │ • PDF & Image Preprocessor │                      │ • Deterministic Checks     │                      │ • Smart Payment Planner    │
-  │ • PaddleOCR-VL / PyMuPDF   │                      │ • Indian GST (CGST/SGST)   │                      │ • Server-Side Order Create │
-  │ • Immutable Raw OCR Store  │                      │ • HSN/SAC Code Validation  │                      │ • PayPal Sandbox Capture   │
-  │ • Editable Line Items Form │                      │ • Dual-Key Risk Engine     │                      │ • Verified Transaction Log │
-  │ • Revision History Audit   │                      │ • PayFlow Copilot (AI)     │                      │ • ReportLab PDF Compiler   │
-  └────────────────────────────┘                      └────────────────────────────┘                      └────────────────────────────┘
+
+---
+
+## 2. Core Capabilities
+
+### 2.1 Advanced Multimodal OCR Engine
+
+- **Supported Formats:** Scanned PDF, PNG, JPG, JPEG, TIFF, handwritten bills, and digital invoices.
+- **Document Preprocessing:** Automatic deskewing, contrast enhancement, grayscale binarization, and noise filtering using Pillow.
+- **Multi-Engine Extraction:** PyMuPDF vector extraction combined with PaddleOCR-VL 1.6 extraction heuristics.
+- **Structured Data Recognition:** Extracts vendor information, invoice numbers, dates, payable totals, and other financial fields.
+- **Immutable OCR Storage:** Preserves original extraction results separately in `ocr_extraction_results`.
+- **Editable Extraction Results:** Allows users to review and correct extracted invoice information.
+
+### 2.2 Invoice Review & Correction Management
+
+- Invoice lifecycle management with the following statuses:
+  - Pending Review
+  - Processing
+  - Reviewed
+  - Corrected
+  - Approved
+  - Rejected
+  - Payment Pending
+  - Paid
+- Field-level correction tracking.
+- Records original OCR values and corrected values.
+- Maintains editor identity, timestamps, and correction justification.
+- Preserves invoice revision history in `invoice_correction_history`.
+
+### 2.3 Intelligent Risk & Fraud Analysis Engine
+
+**Dual-Layer Risk Assessment (0–100 Score)**
+
+The platform combines deterministic financial validation with contextual AI-generated explanations.
+
+| Risk Indicator | Risk Score |
+|---|---:|
+| Duplicate Invoice Number | +40 |
+| Duplicate Vendor and Amount | +30 |
+| Inconsistent Invoice Dates | +20 |
+| High-Value Single Disbursement | +15 |
+| Arithmetic Variance | +15 |
+
+Additional capabilities:
+
+- GSTIN checksum and format validation.
+- Duplicate invoice collision detection.
+- Vendor and amount matching.
+- Invoice date and due-date consistency checks.
+- Subtotal and tax arithmetic validation.
+- Contextual risk explanations using Google Gemini 1.5 Flash.
+- Recommended human verification actions.
+
+### 2.4 Indian GST & Tax Intelligence
+
+- Automatic identification of intra-state and inter-state transactions.
+- **Intra-State Transactions:** CGST + SGST.
+- **Inter-State Transactions:** IGST.
+- HSN/SAC code tracking at line-item level.
+- Tax rate categorization:
+  - 0%
+  - 5%
+  - 12%
+  - 18%
+  - 28%
+- Vendor-wise tax breakdown.
+- Monthly GST collection and tax analytics.
+- Input Tax Credit (ITC) reconciliation features.
+
+### 2.5 Smart Payment Planner & Cash Flow Optimizer
+
+The intelligent payment planner evaluates invoices against available treasury budgets and payment priorities.
+
+**Payment Classification:**
+
+- **Pay Now:** Low or medium-risk invoices with immediate deadlines and available budget.
+- **Review First:** High-value invoices or invoices with missing tax information.
+- **Schedule Later:** Invoices that can be deferred according to payment terms.
+- **Hold for Verification:** Duplicate invoices or suspicious banking information.
+
+Additional capabilities:
+
+- Dynamic budget allocation.
+- Invoice prioritization.
+- Payment deadline evaluation.
+- Financial recommendation explanations.
+- Cash-flow optimization.
+
+**Human-in-the-Loop Guardrail:** AI recommendations do not independently authorize or execute payments. Explicit human approval is mandatory.
+
+### 2.6 PayPal Payment Automation
+
+Integration with the official PayPal REST API v2 Sandbox.
+
+**Payment Workflow:**
+
+1. Server-side PayPal order creation.
+2. Strict invoice amount binding.
+3. Human authorization and approval.
+4. Server-side payment capture.
+5. Capture status, amount, and currency verification.
+6. Transaction archival in the payment ledger.
+
+Key endpoints:
+
+```http
+POST /api/payments/create-order
+POST /api/payments/capture-order
 ```
 
----
+Additional capabilities:
 
-## 🚀 Key Modules & Capabilities
+- PayPal Sandbox integration.
+- Verified transaction records.
+- Idempotency protection against duplicate settlement.
+- Payment history tracking.
+- No simulated successful payments without verified server-side capture.
 
-### 1. Advanced Multimodal OCR Engine (Module 2)
-- **Supported Formats**: Scanned PDF, PNG, JPG, JPEG, TIFF, handwritten bills, digital invoices.
-- **Preprocessing Pipeline**: Auto-deskewing, contrast enhancement, grayscale binarization, and noise filtering via Pillow.
-- **Dual Text & Coordinate Extraction**: PyMuPDF vector blocks + PaddleOCR-VL 1.6 heuristics with bounding tags (`VENDOR_ID`, `INVOICE_NUM`, `DATES_VALIDATED`, `PAYABLE_TOTAL`).
-- **Immutable OCR Storage**: Raw OCR extracted payload is stored separately in `ocr_extraction_results` so the ground truth is never lost or overwritten.
+### 2.7 PayFlow Intelligence Copilot
 
-### 2. Invoice Review & Correction Management (Module 3)
-- **Review Statuses**: `Pending Review`, `Processing`, `Reviewed`, `Corrected`, `Approved`, `Rejected`, `Payment Pending`, `Paid`.
-- **Field-Level Audit Trail**: Every manual or operator adjustment is tracked in `invoice_correction_history` capturing:
-  - Modified field name
-  - Original OCR value
-  - Corrected value
-  - Editor identity & timestamp
-  - Correction justification reason
+Conversational financial assistant powered by Gemini / Claude.
 
-### 3. Intelligent Risk & Fraud Analysis Engine (Module 4)
-- **Dual-Layer Assessment (0–100 Score)**:
-  - 🔍 **Duplicate Invoice Number**: Collision check across all registered accounts (+40 pts).
-  - 🔍 **Duplicate Billing Collision**: Matching vendor and identical amount (+30 pts).
-  - 🔍 **GSTIN Checksum Validation**: Indian GSTIN regex compliance (`^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$`).
-  - ⏰ **Inconsistent Dates**: Flagged when due date precedes invoice date or exceeds normal cycles (+20 pts).
-  - 💰 **High-Value Single Disbursement**: Exceeds standard $10,000 / ₹1,00,000 single sign-off cap (+15 pts).
-  - 🔢 **Arithmetic Variance**: Subtotal + Tax discrepancy tolerance (+15 pts).
-- **Contextual LLM Enrichment**: Google Gemini 1.5 Flash provides natural-language risk assessment and recommended human action.
+Capabilities:
 
-### 4. Indian GST & Tax Intelligence (Module 5)
-- Automatic state-wise categorization:
-  - **Intra-State**: Central GST (CGST) + State GST (SGST)
-  - **Inter-State**: Integrated GST (IGST)
-- Line-item level HSN/SAC code tracking and tax rate allocations (0%, 5%, 12%, 18%, 28%).
-- Tax breakdown by vendor and monthly collection curves.
+- Natural-language financial queries.
+- Outstanding invoice analysis.
+- Cash-flow summaries.
+- GST allocation queries.
+- Duplicate invoice alerts.
+- Vendor expenditure analysis.
+- Database-context-based responses.
 
-### 5. Smart Payment Planner & Cash Flow Optimizer (Module 7)
-- Dynamic budget allocation (e.g., $5,000 or ₹1,00,000).
-- Action classification:
-  - 🟢 **Pay Now**: Low/medium risk, immediate deadline, within current budget.
-  - 🟡 **Review First**: High value or missing tax details.
-  - 🔵 **Schedule Later**: Standard terms deferred to optimize interest yield.
-  - 🔴 **Hold for Verification**: Duplicate invoice or suspicious bank routing detected.
-- **Strict Guardrail**: The AI never authorizes or executes disbursements automatically; explicit human-in-the-loop approval is mandatory.
+Example queries:
 
-### 6. PayPal Payment Automation (Module 8)
-- **Official PayPal REST API v2 Sandbox**:
-  - `POST /api/payments/create-order` creates orders server-side with strict amount bindings.
-  - `POST /api/payments/capture-order` executes verified server-side capture and verifies status, amount, and currency.
-- **Zero Simulated Fake Payments**: Invoices are never marked as `Paid` in demo mode without verified server capture.
-- **Idempotency**: Prevents double-settlement on identical invoices.
+```text
+Which invoices are overdue?
 
-### 7. PayFlow Intelligence Copilot (Module 9)
-- Conversational assistant powered by Gemini / Claude with real database context retrieval.
-- Answers natural language questions regarding cash flow, outstanding debts, GST allocations, duplicate alerts, and vendor concentration.
+What is our total IGST exposure?
 
-### 8. Audit-Grade PDF Report Generation (Module 10)
-- Built with **ReportLab 5.1**.
-- Compiles 5 distinct PDF reports with executive summaries, KPI tables, and cryptographic digital seals:
-  - Monthly Billing & Payables Audit (`monthly_invoice`)
-  - Indian GST Tax Intelligence Return (`gst_summary`)
-  - Vendor Expenditure Analysis (`vendor_wise`)
-  - PayPal Settlement & Treasury Ledger (`payment_history`)
-  - High-Risk & Duplicate Fraud Audit (`risk_analysis`)
+Show invoices with high risk scores.
 
-### 9. Administration & Role-Based Access Control (Module 11)
-- **Admin vs Standard User** permissions enforced on backend endpoints.
-- Manage users (activate, deactivate, assign admin privileges).
-- System-wide activity audit logs tracking logins, uploads, corrections, reports, and payments.
+Which vendors have the highest expenditure?
+```
 
-### 10. Notification Center (Module 12)
-- Real-time notification tray with unread counts and alerts for high-risk flags, overdue invoices, and early payment discounts.
+### 2.8 Audit-Grade PDF Report Generation
+
+Powered by **ReportLab 5.1**.
+
+The platform generates five financial and compliance reports:
+
+| Report | Report Identifier |
+|---|---|
+| Monthly Billing & Payables Audit | `monthly_invoice` |
+| Indian GST Tax Intelligence Return | `gst_summary` |
+| Vendor Expenditure Analysis | `vendor_wise` |
+| PayPal Settlement & Treasury Ledger | `payment_history` |
+| High-Risk & Duplicate Fraud Audit | `risk_analysis` |
+
+Reports include executive summaries, KPI tables, financial breakdowns, and cryptographic digital seals as specified by the reporting module.
+
+### 2.9 Administration & Role-Based Access Control
+
+- Administrator and standard-user roles.
+- Backend-enforced role-based permissions.
+- User activation and deactivation.
+- Administrator privilege assignment.
+- System-wide activity audit logs.
+- Login, upload, correction, report, and payment activity tracking.
+
+### 2.10 Notification Center
+
+- Real-time notification tray.
+- Unread notification counts.
+- High-risk invoice alerts.
+- Overdue invoice notifications.
+- Early payment discount alerts.
 
 ---
 
-## 🎨 Visual Design System — Premium Emerald Dark Mode
+## 3. Technology Stack
 
-Designed using the dark fintech aesthetic:
-- **Main Canvas**: `#0B0F14` (Deep charcoal canvas)
-- **Sidebar & Top Header**: `#101820` (Dark obsidian sidebar)
-- **Cards & Surfaces**: `#151F29` with `#1B2933` elevated interactive panels
-- **Structural Borders**: `#263640`
-- **Primary Accent**: Emerald Green (`#10B981`)
-- **Secondary Accent**: Mint (`#34D399`)
-- **Main Text**: `#F8FAFC`
-- **Muted Text**: `#94A3B8`
-- **Status Accents**: Emerald Success (`#10B981`), Amber Warning (`#F59E0B`), Coral Danger (`#EF4444`)
-
----
-
-## 👥 Customer Personas & Dedicated Experiences
-
-- **Freelancers**:
-  - Simple invoice status tracking
-  - Payment due-date monitoring
-  - Client payment receipts
-  - Monthly personal expense summaries
-- **Small Businesses**:
-  - Vendor relationship management
-  - AI Payment Decision Agent (budget prioritizer)
-  - Invoice risk anomaly audits
-  - GST input tax analytics
-  - Executive financial reports
-- **Accountants & Auditors**:
-  - Multi-page bulk document ingestion
-  - Editable OCR fields with confidence scores
-  - Immutable revision history (`InvoiceCorrectionHistory`)
-  - GSTR-ready GST tax summaries
-  - ReportLab 5.1 audit-ready PDF compilations
+| Layer | Technologies |
+|---|---|
+| Frontend | React, TypeScript, Vite |
+| Styling | CSS, Tailwind CSS |
+| Backend | Python, FastAPI |
+| Database | SQLite |
+| OCR Engine | PaddleOCR-VL 1.6, PyMuPDF |
+| Image Processing | Pillow |
+| AI Integration | Google Gemini 1.5 Flash, Claude |
+| Financial Intelligence | Deterministic Risk Engine |
+| Payment Gateway | PayPal REST API v2 Sandbox |
+| PDF Generation | ReportLab 5.1 |
+| Authentication | JWT, Role-Based Access Control |
 
 ---
 
-## 💎 Proposed Subscription Tiers (`/pricing`)
+## 4. Visual Design System
+
+### Premium Emerald Dark Mode
+
+PayFlow AI follows a premium fintech-inspired dark interface designed for enterprise financial operations.
+
+| Design Element | Color |
+|---|---|
+| Main Canvas | `#0B0F14` |
+| Sidebar & Header | `#101820` |
+| Cards & Surfaces | `#151F29` |
+| Elevated Panels | `#1B2933` |
+| Structural Borders | `#263640` |
+| Primary Accent | `#10B981` |
+| Secondary Accent | `#34D399` |
+| Main Text | `#F8FAFC` |
+| Muted Text | `#94A3B8` |
+| Warning | `#F59E0B` |
+| Danger | `#EF4444` |
+
+---
+
+## 5. Customer Personas & Dedicated Experiences
+
+### Freelancers
+
+- Invoice status tracking.
+- Payment due-date monitoring.
+- Client payment receipts.
+- Monthly expense summaries.
+
+### Small Businesses
+
+- Vendor relationship management.
+- AI Payment Decision Agent.
+- Invoice risk analysis.
+- GST input tax analytics.
+- Executive financial reports.
+
+### Accountants & Auditors
+
+- Bulk document ingestion.
+- Editable OCR fields with confidence scores.
+- Invoice correction history.
+- GST tax summaries.
+- Audit-ready PDF reports.
+
+---
+
+## 6. Subscription & Pricing Model
+
+The platform proposes four subscription tiers.
 
 | Tier | Proposed Pricing | Limits | Entitlements |
 |---|---|---|---|
-| **Free Community** | $0 / mo | 10 inv/mo, 1 seat | Multi-engine OCR, basic checks, single PayPal checkout |
-| **Starter** | $19 / ₹1,499 / mo | 60 inv/mo, 2 seats | CGST/SGST tax breakdown, field audit logs, standard PDF reports |
-| **Professional** | $49 / ₹3,999 / mo *(Popular)* | 300 inv/mo, 5 seats | Full IGST + ITC reconciliation, AI Payment Decision Agent, batch PayPal |
-| **Business** | $99 / ₹7,999 / mo | Unlimited | Multi-user RBAC, custom compliance export (SOC2), dedicated OCR queue |
+| Free Community | $0/month | 10 invoices, 1 seat | Multi-engine OCR, basic checks, single PayPal checkout |
+| Starter | $19 / ₹1,499 per month | 60 invoices, 2 seats | CGST/SGST breakdown, audit logs, standard reports |
+| Professional | $49 / ₹3,999 per month | 300 invoices, 5 seats | IGST, ITC reconciliation, AI payment decisions, batch PayPal |
+| Business | $99 / ₹7,999 per month | Unlimited | Multi-user RBAC, compliance exports, dedicated OCR queue |
+
+*Pricing and entitlements represent the proposed subscription model.*
 
 ---
 
-## ⚙️ Quick Start
+## 7. Local Development Setup
 
-### 1. Prerequisites
+### 7.1 Prerequisites
+
 - Python 3.10+
-- Node.js 18+ and npm
+- Node.js 18+
+- npm
+- Git
 
-### 2. Backend Setup
+### 7.2 Clone the Repository
+
+```bash
+git clone https://github.com/sanjiv-18/Payflow-ai.git
+
+cd Payflow-ai
+```
+
+### 7.3 Backend Setup
+
+Navigate to the backend directory:
+
 ```bash
 cd backend
+```
+
+Create a Python virtual environment:
+
+```bash
 python -m venv venv
+```
 
-# Windows
+Activate the environment.
+
+**Windows:**
+
+```powershell
 venv\Scripts\activate
-# macOS/Linux
-source venv/bin/activate
+```
 
+**macOS / Linux:**
+
+```bash
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
+```
+
+Initialize the database:
+
+```bash
 python migrate_db.py
+```
+
+Start the FastAPI backend:
+
+```bash
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-### 3. Frontend Setup
+Backend API:
+
+```text
+http://127.0.0.1:8000
+```
+
+API documentation:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+### 7.4 Frontend Setup
+
+Open a new terminal:
+
 ```bash
 cd frontend
+```
+
+Install frontend dependencies:
+
+```bash
 npm install
+```
+
+Start the development server:
+
+```bash
 npm run dev -- --host 127.0.0.1 --port 5173
 ```
 
-### 4. Run Automated Test Suite
+Frontend application:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## 8. Automated Testing & Verification
+
+Run the dedicated product verification script:
+
 ```bash
 cd backend
+
 python verify_product.py
 ```
-Outputs 100% pass rate across all 9 verification modules.
+
+The verification script covers nine verification modules and reports the overall test results.
+
+### Frontend Build Verification
+
+```bash
+cd frontend
+
+npm run build
+```
 
 ---
 
-## 🔐 Pre-Seeded Test Credentials
+## 9. Pre-Seeded Test Credentials
 
-| Role | Email | Password | Pre-Loaded Scenarios |
-|---|---|---|---|
-| **System Administrator** | `admin@payflow.ai` | `admin1234` | Full user management, global activity logs, system health |
-| **Demo Executive** | `demo@payflow.ai` | `demo1234` | Low-risk AWS SLA, Indian GST Apex, Notion Labs Fraud, DevCore Overdue |
+The application provides pre-seeded accounts for demonstration and testing.
 
----
-
-## 💳 PayPal Sandbox Testing Instructions
-
-1. Obtain sandbox credentials from [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/applications/sandbox).
-2. Configure `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` in `backend/.env`.
-3. In the workspace, navigate to **Invoices** or **Payment Planner**.
-4. Select invoices and click **Batch Settle with PayPal**.
-5. On `/checkout`, verify:
-   - Environment toggle is set to `PayPal Sandbox Rail`.
-   - The **Human-in-the-Loop Sign-off** checkbox must be checked.
-   - Click **⚡ Approve & Release**.
-   - Server-side capture executes against `/v2/checkout/orders` and returns verified Capture ID (`PAYPAL-SB-CAP-xxxxx`).
-   - Transaction is archived in the immutable payment ledger (`/payments`).
-
----
-
-## 🎬 Complete Hackathon Demo Workflow
-
-1. **Visit Landing Page** (`/welcome`):
-   - Review tagline: *"From Invoice to Intelligence to Payment."*
-   - Explore "Why PayFlow AI?" customer benefit pillars.
-   - Test Persona Switcher (Freelancer / Small Business / Accountant).
-   - Click **Try Live Demo** or **Launch Pre-Seeded Workspace**.
-2. **Explore Executive Dashboard** (`/`):
-   - Observe live **Business Value Delivered** panel (Total Invoices, Estimated Hours Saved, Duplicates Intercepted, Indian GST Managed).
-   - Toggle Workflow Views (Freelancer, Small Business, Accountant Console).
-3. **Upload / Ingest Invoices** (`/invoices/upload`):
-   - Drop sample multi-page PDF or receipt image.
-   - Observe OCR extraction with bounding blocks and GSTIN validation.
-4. **Inspect & Edit Invoices** (`/invoices`):
-   - Click **Inspect & Edit** on any invoice.
-   - View Extraction Confidence (e.g., `98.6%`) and explainable risk reasons.
-   - Edit a field (e.g., Vendor Name or Amount) and provide a justification.
-   - Observe the new revision recorded in `Modification Audit Ledger`.
-5. **Run AI Payment Decision Agent** (`/planner`):
-   - Enter available treasury budget (e.g., `$35,000`).
-   - Run AI Optimization — invoices are prioritized into `Pay Now`, `Hold`, and `Defer` with grounded explanations.
-6. **Execute Verified PayPal Settlement** (`/checkout`):
-   - Review dual mandate authorization.
-   - Check mandatory Human Authorization sign-off.
-   - Click **Approve & Release** to execute verified PayPal Sandbox capture.
-7. **Compile Audit-Grade Report** (`/reports`):
-   - Select report type (e.g. *Indian GST Tax Intelligence Return* or *High-Risk Fraud Audit*).
-   - Click **Generate Audit Report** to download formatted ReportLab 5.1 PDF.
-8. **Consult Grounded AI Assistant** (`/assistant`):
-   - Ask: *"Which invoices are overdue?"* or *"What is our total IGST exposure?"*
-   - Copilot replies using factual database figures.
-9. **Review Packaging & Plans** (`/plans`):
-   - Explore Free Community, Starter, Professional, and Business tiers.
-   - Test currency toggle (USD / INR) and annual discount switch.
-
----
-
-## 🧪 Verified Integration Tests
-
-| Test Scenario | Verification Method | Status |
+| Role | Email | Password |
 |---|---|---|
-| **FastAPI Backend Initialisation** | `GET http://127.0.0.1:8000/api/docs` | **200 OK** |
-| **Vite Frontend Dev Server** | `GET http://127.0.0.1:5173/` | **200 OK** |
-| **JWT Authentication & RBAC** | `POST /api/auth/login` | **Verified** |
-| **ReportLab PDF Generation** | `POST /api/reports/generate` | **Generated (3.8 KB PDF)** |
-| **OCR Pipeline & Preprocessing** | PyMuPDF text & vector block extraction | **Verified** |
-| **PayPal Sandbox Order Creation** | Server-side `api-m.sandbox.paypal.com` | **Integrated** |
-| **Deterministic Risk Engine** | 6-vector mathematical assertions | **Verified** |
-| **TypeScript Compilation** | `npm run build` | **0 Errors (Built in 2.39s)** |
+| System Administrator | `admin@payflow.ai` | `admin1234` |
+| Demo Executive | `demo@payflow.ai` | `demo1234` |
+
+**Administrator Access:**
+- User management.
+- Global activity logs.
+- System health information.
+
+**Demo Executive Access:**
+- Invoice processing.
+- Payment planning.
+- Financial analytics.
+- Risk analysis.
+
+*These are demonstration credentials. Replace default passwords and configure secure authentication credentials before any production deployment. Never publish real credentials or API secrets.*
 
 ---
 
-## 📄 License
+## 10. PayPal Sandbox Integration
 
-MIT License — see [LICENSE](file:///d:/PAYFLOW%20AI/LICENSE) for details.
+### Configuration
+
+1. Visit the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/applications/sandbox).
+2. Create or select a Sandbox application.
+3. Obtain the Sandbox Client ID and Client Secret.
+4. Configure the following variables in `backend/.env`:
+
+```env
+PAYPAL_CLIENT_ID=your_sandbox_client_id
+PAYPAL_CLIENT_SECRET=your_sandbox_client_secret
+```
+
+5. Navigate to the Invoices or Payment Planner section.
+6. Select invoices and initiate the payment workflow.
+7. Navigate to the Checkout page.
+8. Verify that the environment is set to `PayPal Sandbox Rail`.
+9. Complete the mandatory Human-in-the-Loop Sign-off.
+10. Select **Approve & Release**.
+11. Verify the server-side capture response and transaction record.
+12. Review the transaction in the Payments section.
+
+**Important:** Payments must be verified through the PayPal Sandbox capture workflow. A successful simulated response must not be treated as a completed payment.
+
+---
+
+## 11. Complete Hackathon Demo Workflow
+
+### Step 1: Landing Page
+
+- Open `/welcome`.
+- Explore the PayFlow AI introduction.
+- Review the customer benefit pillars.
+- Test the Freelancer, Small Business, and Accountant personas.
+- Launch the live demo workspace.
+
+### Step 2: Executive Dashboard
+
+- Open the main dashboard.
+- Review total invoices.
+- Inspect estimated hours saved.
+- Monitor duplicate invoices intercepted.
+- Explore Indian GST metrics.
+- Switch between persona views.
+
+### Step 3: Invoice Ingestion
+
+- Navigate to `/invoices/upload`.
+- Upload a sample PDF or invoice image.
+- Observe OCR extraction.
+- Review extracted invoice fields and GSTIN validation.
+
+### Step 4: Invoice Review & Correction
+
+- Open `/invoices`.
+- Select an invoice and choose Inspect & Edit.
+- Review extraction confidence and risk explanations.
+- Modify invoice fields where necessary.
+- Provide correction justification.
+- Verify the modification audit history.
+
+### Step 5: AI Payment Planning
+
+- Navigate to `/planner`.
+- Enter the available treasury budget.
+- Run the AI optimization process.
+- Review Pay Now, Hold, and Defer recommendations.
+
+### Step 6: PayPal Payment Execution
+
+- Open `/checkout`.
+- Review the payment authorization.
+- Complete mandatory human approval.
+- Execute the PayPal Sandbox capture.
+- Verify the payment transaction.
+
+### Step 7: Audit Report Generation
+
+- Navigate to `/reports`.
+- Select a report category.
+- Generate the required financial or GST report.
+- Download the generated PDF.
+
+### Step 8: AI Intelligence Copilot
+
+- Open `/assistant`.
+- Ask financial questions.
+- Review answers grounded in database context.
+
+### Step 9: Subscription Plans
+
+- Navigate to `/plans`.
+- Explore the proposed subscription tiers.
+- Test USD/INR currency switching.
+- Explore annual discount options.
+
+---
+
+## 12. Verified Integration Tests
+
+The following verification scenarios are documented for the project.
+
+| Test Scenario | Verification Method |
+|---|---|
+| FastAPI Backend Initialization | `GET /api/docs` |
+| Vite Frontend Development Server | `GET /` |
+| JWT Authentication & RBAC | `POST /api/auth/login` |
+| ReportLab PDF Generation | `POST /api/reports/generate` |
+| OCR Pipeline & Preprocessing | PyMuPDF text and vector extraction |
+| PayPal Sandbox Order Creation | PayPal Sandbox REST API |
+| Deterministic Risk Engine | Six-vector mathematical assertions |
+| TypeScript Compilation | `npm run build` |
+
+---
+
+## 13. Security & Safe Payment Guidelines
+
+1. **Human-in-the-Loop Authorization:** AI recommendations cannot independently authorize or execute financial disbursements.
+2. **Payment Verification:** Payment status must be based on verified server-side PayPal capture responses.
+3. **Duplicate Payment Protection:** Idempotency mechanisms help prevent duplicate settlement.
+4. **Role-Based Access Control:** Administrative and standard-user permissions are enforced through backend endpoints.
+5. **Invoice Auditability:** Original OCR extraction and manual correction history are maintained separately.
+6. **Credential Protection:** PayPal Client Secrets and other sensitive configuration values must remain server-side and must not be committed to GitHub.
+7. **Financial Validation:** Invoice arithmetic, GST information, duplicate identifiers, and payment conditions are checked before payment recommendations.
+
+---
+
+## 14. Project Highlights
+
+- Multimodal invoice intelligence.
+- AI-assisted financial risk analysis.
+- Indian GST and HSN/SAC intelligence.
+- Intelligent payment prioritization.
+- Verified PayPal Sandbox integration.
+- Human-authorized financial operations.
+- Conversational financial intelligence.
+- Audit-oriented PDF report generation.
+- Role-based administrative management.
+- Premium enterprise fintech dashboard.
+
+---
+
+## 15. License
+
+This project is licensed under the MIT License.
+
+See [LICENSE](LICENSE) for additional details.
+
+---
+
+**PayFlow AI — From Invoice to Intelligence to Payment.**
