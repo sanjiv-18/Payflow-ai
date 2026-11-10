@@ -90,7 +90,11 @@ class Invoice(Base):
     description = Column(Text, default="")
 
     # Review Statuses: pending_review, processing, reviewed, corrected, approved, rejected, payment_pending, paid
-    status = Column(String(50), default="pending_review", index=True)
+    # Workflow status reflecting invoice lifecycle stages
+    # Possible values: uploaded, processing, review_required, verified, approved, scheduled_for_payment, paid, rejected
+    status = Column(String(50), default="uploaded", index=True)
+    # History of status changes with timestamps for auditability
+    workflow_history = Column(JSON, default=list, nullable=False)
     
     # Risk Analysis
     risk_score = Column(Float, default=0.0)  # 0 to 100

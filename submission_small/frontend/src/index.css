@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 216 29% 6%;     /* #0B0F14 */
+    --foreground: 210 40% 98%;    /* #F8FAFC */
+    --card: 213 32% 12%;          /* #151F29 */
+    --card-foreground: 210 40% 98%;
+    --popover: 213 32% 12%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 158 84% 39%;       /* #10B981 */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 206 30% 15%;     /* #1B2933 */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 206 30% 15%;
+    --muted-foreground: 215 20% 65%; /* #94A3B8 */
+    --accent: 156 73% 52%;        /* #34D399 */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;     /* #EF4444 */
+    --destructive-foreground: 210 40% 98%;
+    --border: 204 25% 20%;        /* #263640 */
+    --input: 204 25% 20%;
+    --ring: 158 84% 39%;
+  }
+
+  * {
+    border-color: #263640;
+  }
+
+  html, body {
+    background-color: #0B0F14;
+    color: #F8FAFC;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color-scheme: dark;
+  }
+}
+
+/* Custom dark scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0F14;
+}
+::-webkit-scrollbar-thumb {
+  background: #263640;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #10B981;
+}
+
+/* Glassmorphism & futuristic accents */
+.glass-panel {
+  background: rgba(17, 27, 45, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(37, 50, 71, 0.8);
+}
+
+.glass-dropdown {
+  background: rgba(11, 18, 32, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid #253247;
+}
+
+.glow-blue {
+  box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.35);
+}
+
+.glow-violet {
+  box-shadow: 0 0 25px -5px rgba(139, 92, 246, 0.35);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
